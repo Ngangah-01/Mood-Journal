@@ -1,0 +1,645 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <title>Mood Journal</title>
+    <style>
+        .page {
+            position: relative;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        
+        .faq-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background-color: #ffe53b;
+            background-image: linear-gradient(147deg, #ffe53b 0%, #ff2525 74%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.151);
+            position: relative;
+        }
+
+        .faq-button svg {
+            height: 2.5em;
+            fill: white;
+        }
+
+        .faq-button:hover svg {
+            animation: jello-vertical 0.7s both;
+        }
+
+        @keyframes jello-vertical {
+            0% {
+                transform: scale3d(1, 1, 1);
+            }
+
+            30% {
+                transform: scale3d(0.75, 1.25, 1);
+            }
+
+            40% {
+                transform: scale3d(1.25, 0.75, 1);
+            }
+
+            50% {
+                transform: scale3d(0.85, 1.15, 1);
+            }
+
+            65% {
+                transform: scale3d(1.05, 0.95, 1);
+            }
+
+            75% {
+                transform: scale3d(0.95, 1.05, 1);
+            }
+
+            100% {
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        .tooltip {
+            position: absolute;
+            top: -30px;
+            opacity: 0;
+            background-color: #ffe53b;
+            background-image: linear-gradient(147deg, #ffe53b 0%, #ff2525 74%);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition-duration: 0.2s;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .tooltip::before {
+            position: absolute;
+            content: "";
+            width: 10px;
+            height: 10px;
+            background-color: #ff2525;
+            background-size: 1000%;
+            background-position: center;
+            transform: rotate(45deg);
+            bottom: -15%;
+            transition-duration: 0.3s;
+        }
+
+        .faq-button:hover .tooltip {
+            top: -40px;
+            opacity: 1;
+            transition-duration: 0.3s;
+        }
+
+        .faq-content {
+            background-color: white;
+            border: 2px solid #12B1D1;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="book-wrapper">
+        <div class="flipbook">
+            <div class="hard">My Mood Journal <small>~Keeping track of my emotional damage~</small>
+                <div class="login-container">
+                    <div class="heading">MOOD</div>
+                    <form method="post" class="form">
+                        <input style="font-size: larger; border: 1px solid #12B1D1;" class="input" type="text"
+                            name="username" id="username" placeholder="Username... " value="{{ username }}" disabled>
+                        <input style="font-size: 15px; border: 1px solid #12B1D1;" class="input" type="text"
+                            name="email" id="email" placeholder="Email" value="{{ email }}" disabled>
+                    </form>
+                </div>
+            </div>
+            <div class="hard"></div>
+            {% for i in pages_range %}
+            <div class="page">
+                <div class="date"></div>
+                <textarea placeholder="Write your thoughts here..."></textarea>
+                <div class="page-number">{{ forloop.counter }}</div>
+            </div>
+            {% endfor %}
+            <div class="hard end-cover">
+                <!-- From Uiverse.io by vinodjangid07 -->
+                <button class="faq-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+                        <path fill="#fff"
+                            d="M18 13h-5v5c0 .55-.45 1-1 1s-1-.45-1-1v-5H6c-.55 0-1-.45-1-1s.45-1 1-1h5V6c0-.55.45-1 1-1s1 .45 1 1v5h5c.55 0 1 .45 1 1s-.45 1-1 1" />
+                    </svg>
+                    <span class="tooltip">Add pages</span>
+                </button>
+                <div class="faq-content" style="display: none;">
+                    <div id="closeModal" style="cursor: pointer;float: right;">
+                        <img src="{% static 'images/close.gif' %}" alt="" style="width: 30px; height: 30px;">
+                    </div>
+                    <p style="color: black;text-align: center;">Here you can add more pages to your journal.</p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <span id="removePages"
+                            style="color: black;font-size: large;margin-right: 10px;cursor: pointer;">-</span>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div
+                                style="border-radius: 5px; border: 1px solid black; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                                <span id="input" style="font-size: large; color: black;">1</span>
+                            </div>
+                        </div>
+                        <span id="addPages"
+                            style="color: black;font-size: large;margin-left: 10px; cursor: pointer;">+</span>
+                    </div>
+                    <button id="addingBtn"
+                        style="color: white; padding: 10px 20px; margin-top: 10px; width: 100%; border-radius: 40px;border: none;background-color: #12B1D1; text-align: center;">Add</button>
+                </div>
+            </div>
+            <div class="hard end-cover">Thank You <small>~ Mood Team ~</small></div>
+        </div>
+    </div>
+    <div id="logout" style="display: none;width: 60px; height: 60px;">
+        <img src="{% static 'images/padlock2.gif' %}" alt="" style="width: 60px; height: 60px;">
+    </div>
+    <div id="chart" style="display: none;width: 40px; height: 40px;">
+        <img src="{% static 'images/chart.gif' %}" alt="" style="width: 30px; height: 30px;">
+    </div>
+    <!-- Chart Container -->
+    <div id="chartContainer"
+        style="display:none; width: 600px; margin-top:20px; position: fixed;top: 40px;left: 50%;transform: translateX(-50%);background: rgba(255, 255, 255, 0.9);padding: 20px;border-radius: 10px;box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 100;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="periodSelect">Select Period:</label>
+            <div id="closeChart" style="cursor: pointer;">
+                <img src="{% static 'images/close.gif' %}" alt="" style="width: 30px; height: 30px;">
+            </div>
+        </div>
+        <select id="periodSelect">
+            <option value="weekly">Daily</option>
+            <option value="monthly">Weekly</option>
+            <option value="annual">Monthly</option>
+        </select>
+        <canvas id="moodChart" width="600" height="300"></canvas>
+    </div>
+
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/turn.js' %}"></script>
+    <script>
+        let currentIndex = 0;
+        const track = document.querySelector(".slider-track");
+        const slideWidth = 350; // same as .login-container width
+
+        function showSlide(index) {
+            currentIndex = index;
+            track.style.transform = `translateX(-${index * slideWidth}px)`;
+        }
+
+        $("#showSignup").on("click", function () {
+            showSlide(1); // Show sign-up form
+        });
+
+        $("#showLogin").on("click", function () {
+            showSlide(0); // Show login form
+        });
+
+        $(document).on("click", ".faq-button", function () {
+            console.log("FAQ button clicked");
+            $(".faq-content").show();
+        });
+
+        $(document).on("click", "#addingBtn", function () {
+            console.log("Adding button clicked");
+            fetch("{% url 'api_pageAdd' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify({
+                    addPages: $("#input").text()  // use .val() for input, not .text()
+                })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    return res.json();
+                })
+                .then(data => {
+                    console.log("Response from API:", data);
+                })
+                .catch(err => console.error("Error in fetch:", err));
+            alert("You will be logged out soon so that the changes can take effect.\nTo proceed kindly log back in.");
+            fetch("{% url 'api_logout' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert("Logged out successfully.");
+                        window.location.href = data.redirect_url;  // 🔹 force browser redirect
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => console.error("Logout error:", err));
+        });
+
+        $(document).on("click", "#closeModal", function () {
+            console.log("Close modal clicked");
+            $(".faq-content").hide();
+        });
+
+
+        $(document).on("click", "#addPages", function () {
+            let num = parseInt($("#input").text()) || 1;
+            num += 1;
+            $("#input").text(num);
+        });
+
+        $(document).on("click", "#removePages", function () {
+            let num = parseInt($("#input").text()) || 1;
+            if (num > 1) {
+                num -= 1;
+            }
+            $("#input").text(num);
+        });
+
+        let logged_in = true;
+
+        $(".flipbook").turn({
+            autoCenter: true,
+        });
+
+        // set date on page
+        const today = new Date().toLocaleDateString();
+        $(".page .date").text(today);
+
+        // 🔹 function to load journals after login
+        function loadJournalsSimple() {
+            fetch("{% url 'api_journals' %}")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.journals || !Array.isArray(data.journals)) {
+                        console.error("Expected { journals: [] }, got:", data);
+                        return;
+                    }
+
+                    const flipbook = $('.flipbook');
+
+                    // Get existing pages (excluding hard covers)
+                    const pages = flipbook.find('.page:not(.hard)');
+
+                    data.journals.forEach((journal, index) => {
+                        if (index < pages.length) {
+                            const pageElement = pages.eq(index);
+
+                            // Parse and format date
+                            const isoDate = journal.title;
+                            const date = new Date(isoDate);
+                            const day = date.getDate();
+                            const month = date.getMonth() + 1;
+                            const year = date.getFullYear();
+                            const formatted = `${month}/${day}/${year}`;
+
+                            // Update page content
+                            pageElement.find('.date').text(formatted);
+                            pageElement.find('textarea').val(journal.content || "");
+                            pageElement.find('.page-number').text(`${index + 1}`);
+                        }
+                    });
+
+                    // Navigate to first journal page
+                    setTimeout(() => {
+                        flipbook.turn('page', 3);
+                    }, 100);
+
+                })
+                .catch(err => console.error("Error fetching journals:", err));
+        }
+        loadJournalsSimple();
+        // open book on click of cover button
+        $("#login-form").on("click", function (e) {
+            e.preventDefault();
+            const response = fetch("{% url 'api_login' %}",
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        username: $("#username").val(),
+                        password: $("#password").val()
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val() // send CSRF token
+                    }
+                }
+            );
+            response.then(res => res.json()).then(data => {
+                if (data.status === "success") {
+                    $(".book-wrapper").removeClass("closed");
+                    $(".flipbook").turn("page", 2);
+                    logged_in = true;
+                    $("#logout").show();
+                    $("#chart").show();
+
+                    loadJournalsSimple();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+
+        $("#logout").show();
+        $("#chart").show();
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Check if this cookie string begins with the name we want
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function getMoodTrends(period) {
+            fetch(`/api/mood_trend/${period}/`, {   // period is embedded in the URL
+                method: "GET",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken")  // optional, usually not needed for GET
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.trends) {
+                        alert("Mood Trends: " + JSON.stringify(data.trends));
+                    } else {
+                        alert("No mood trends data available.");
+                    }
+                })
+                .catch(err => console.error("Error fetching mood trends:", err));
+        }
+
+        $("#logout").on("click", function () {
+            let content = "";
+            // Loop through all .page divs
+            $(".page").each(function () {
+                let date = $(this).find(".date").text().trim();
+                let currentDate = new Date().toLocaleDateString();
+                if (date !== "") {
+                    if (date === currentDate) {
+                        let textArea = $(this).find("textarea");
+                        if (textArea.length > 0) { // ✅ check if textarea exists
+                            let textVal = textArea.val().trim(); // safe usage
+                            if (textVal !== "") {
+                                content += `${textVal}\n`;
+                            }
+                        }
+                    }
+                }
+            });
+            console.log("Collected journal content:\n", content);
+
+            if (content === "") {
+                alert("No new entries to save for today.");
+            }
+            else {
+                const response = fetch("{% url 'api_save' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    body: JSON.stringify({ content: String(content) })
+                });
+                response.then(res => res.json()).then(data => {
+                    if (data.status === "success") {
+                        alert("Journal entry saved successfully.");
+                    } else {
+                        alert("Error saving journal entry: " + data.message);
+                    }
+                });
+            }
+
+            logged_in = false;
+            fetch("{% url 'api_logout' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert("Logged out successfully.");
+                        window.location.href = data.redirect_url;  // 🔹 force browser redirect
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => console.error("Logout error:", err));
+        });
+
+        // listen when page is turning
+        $(".flipbook").bind("turned", function (event, page, view) {
+            if (page == 1 || page === $(".flipbook").turn("pages")) {
+                $(".book-wrapper").addClass("closed");
+            } else {
+                if (logged_in) {
+                    $(".book-wrapper").removeClass("closed");
+                }
+                else {
+                    alert("Please log in to access the journal.");
+                    $(".flipbook").turn("page", 1);
+                }
+            }
+        });
+
+        // Simple auto-flip function - replace your existing textarea input handler
+        // Fixed auto-flip function
+        // $(document).on("input", "textarea", function () {
+        //     let $currentTextarea = $(this);
+
+        //     // Check if textarea is overflowing
+        //     if ($currentTextarea[0].scrollHeight > $currentTextarea.outerHeight()) {
+
+        //         // Get all text from current textarea
+        //         let fullText = $currentTextarea.val();
+
+        //         // Calculate how much text fits (rough estimate)
+        //         let visibleRatio = $currentTextarea.outerHeight() / $currentTextarea[0].scrollHeight;
+        //         let cutPoint = Math.floor(fullText.length * visibleRatio);
+
+        //         // Find last space before cut point to avoid breaking words
+        //         while (cutPoint > 0 && fullText[cutPoint] !== ' ') {
+        //             cutPoint--;
+        //         }
+
+        //         // Split the text
+        //         let textForCurrentPage = fullText.substring(0, cutPoint);
+        //         let overflowText = fullText.substring(cutPoint).trim();
+
+        //         // Only proceed if there's actually overflow text
+        //         if (overflowText.length > 0) {
+        //             // Set current page to fit only what should be there
+        //             $currentTextarea.val(textForCurrentPage);
+
+        //             // Get current page number to determine next page
+        //             let currentPage = $(".flipbook").turn("page");
+        //             let nextPage = currentPage + 1;
+
+        //             // First flip to next page
+        //             $(".flipbook").turn("page", nextPage);
+
+        //             // Then append overflow text after flip animation completes
+        //             setTimeout(() => {
+        //                 // Use a more reliable way to find the next page's textarea
+        //                 let $nextPageDiv = $(".flipbook .page").eq(nextPage - 2); // Adjust index
+        //                 let $nextTextarea = $nextPageDiv.find("textarea");
+
+        //                 if ($nextTextarea.length > 0) {
+        //                     let existingText = $nextTextarea.val();
+        //                     let newText = existingText ? existingText + " " + overflowText : overflowText;
+        //                     $nextTextarea.val(newText);
+        //                     $nextTextarea.focus();
+
+        //                     // Position cursor at end
+        //                     let textLength = $nextTextarea.val().length;
+        //                     $nextTextarea[0].setSelectionRange(textLength, textLength);
+        //                 }
+        //             }, 600); // Slightly longer wait for flip animation
+        //         }
+        //     }
+        // });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let moodChart = null; // keep reference to chart instance
+
+        // Fetch + Render function
+        function getMoodTrends(period) {
+            return fetch(`/api/mood_trend/${period}/`, {
+                method: "GET",
+                headers: { "X-CSRFToken": getCookie("csrftoken") }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        renderMoodChart(data, period);
+                    } else {
+                        alert("No mood trends data available.");
+                    }
+                })
+                .catch(err => console.error("Error fetching mood trends:", err));
+        }
+
+        // Render chart
+        function renderMoodChart(trends, period) {
+            const ctx = document.getElementById("moodChart").getContext("2d");
+
+            // Extract labels and values
+            const labels = trends.map(item => item.day || item.month || item.week);
+            const values = trends.map(item => item.avg_mood);
+
+            // Destroy old chart before drawing new
+            if (moodChart) {
+                moodChart.destroy();
+            }
+
+            moodChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Mood Trend (${period})`,
+                        data: values,
+                        borderColor: "blue",
+                        backgroundColor: "rgba(0,0,255,0.1)",
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: "blue"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 1,
+                            ticks: {
+                                stepSize: 0.5,
+                                callback: function (value) {
+                                    if (value === 0) return "Sad";
+                                    if (value === 0.5) return "Neutral";
+                                    if (value === 1) return "Happy";
+                                    return value; // fallback
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Handle trigger click
+        document.getElementById("chart").addEventListener("click", () => {
+            document.getElementById("chartContainer").style.display = "block";
+            const period = document.getElementById("periodSelect").value;
+            getMoodTrends(period);
+        });
+
+        // Handle close click
+        document.getElementById("closeChart").addEventListener("click", () => {
+            document.getElementById("chartContainer").style.display = "none";
+        });
+
+        // Handle dropdown change
+        document.getElementById("periodSelect").addEventListener("change", (e) => {
+            getMoodTrends(e.target.value);
+        });
+
+        // Helper (CSRF cookie reader)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
